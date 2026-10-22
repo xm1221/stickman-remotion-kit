@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -100 160 180" width="320" height="360">
+<style>
+  .char-head { fill: none; stroke: currentColor; stroke-width: 3; }
+  .char-eyes { fill: currentColor; }
+  .char-body { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<g color="#333333">
+<circle cx="0" cy="-60" r="18" class="char-head" />
+<circle cx="-6" cy="-63" r="2" class="char-eyes" />
+<circle cx="6" cy="-63" r="2" class="char-eyes" />
+<!-- Torso -->
+<line x1="0" y1="-42" x2="0" y2="0" class="char-body" />
+<!-- Arms (raised up) -->
+<path d="M 0 -37 L -18 -55 L -22 -65" class="char-body" />
+<path d="M 0 -37 L 18 -55 L 22 -65" class="char-body" />
+<!-- Legs (tucked) -->
+<path d="M 0 0 L -12 15 L -18 10" class="char-body" />
+<path d="M 0 0 L 12 15 L 18 10" class="char-body" />
+</g>
+</svg>

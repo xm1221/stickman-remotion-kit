@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -100 160 180" width="320" height="360">
+<style>
+  .char-head { fill: none; stroke: currentColor; stroke-width: 3; }
+  .char-eyes { fill: currentColor; }
+  .char-body { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<g color="#333333">
+<!-- Torso (horizontal) -->
+<line x1="0" y1="0" x2="-37" y2="0" class="char-body" />
+<!-- Head (at left end) -->
+<circle cx="-55" cy="0" r="18" class="char-head" />
+<!-- Arms (resting alongside) -->
+<path d="M -37 0 L -40 15 L -35 25" class="char-body" />
+<path d="M -5 0 L -2 15 L 3 25" class="char-body" />
+<!-- Legs (extending right) -->
+<path d="M 0 0 L 30 2 L 53 0" class="char-body" />
+<path d="M 0 0 L 30 -2 L 53 0" class="char-body" />
+</g>
+</svg>

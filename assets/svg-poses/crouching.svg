@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-80 -100 160 180" width="320" height="360">
+<style>
+  .char-head { fill: none; stroke: currentColor; stroke-width: 3; }
+  .char-eyes { fill: currentColor; }
+  .char-body { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<g color="#333333">
+<!-- Torso (shortened — crouch) -->
+<line x1="0" y1="-30" x2="0" y2="0" class="char-body" />
+<!-- Head (lower) -->
+<circle cx="0" cy="-48" r="18" class="char-head" />
+<!-- Arms (reaching down) -->
+<path d="M 0 -25 L -18 -10 L -22 5" class="char-body" />
+<path d="M 0 -25 L 18 -10 L 22 5" class="char-body" />
+<!-- Legs (deeply bent) -->
+<path d="M 0 0 L -20 10 L -25 30" class="char-body" />
+<path d="M 0 0 L 20 10 L 25 30" class="char-body" />
+</g>
+</svg>

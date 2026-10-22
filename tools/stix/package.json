@@ -1,0 +1,41 @@
+{
+  "name": "@bassimeledath/stix",
+  "version": "1.0.0",
+  "description": "Stick figure animation skill for AI coding agents — generate GIF/MP4 animations from natural language prompts",
+  "keywords": [
+    "claude-code",
+    "skill",
+    "agent-skill",
+    "animation",
+    "stick-figure",
+    "stix",
+    "codex",
+    "cursor",
+    "ai-coding"
+  ],
+  "author": "Bassime Ledath",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bassimeledath/stix"
+  },
+  "homepage": "https://github.com/bassimeledath/stix#readme",
+  "bin": {
+    "stix-skill": "./bin/install.sh"
+  },
+  "scripts": {
+    "postinstall": "node bin/postinstall.js"
+  },
+  "files": [
+    "bin/",
+    "SKILL.md",
+    "library/",
+    "references/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
