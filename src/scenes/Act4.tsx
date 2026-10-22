@@ -183,7 +183,7 @@ export const Act4: React.FC = () => {
           color={C.blue}
           eyes={F >= SUCCESS ? "up" : F >= 5620 && F < 5800 ? "normal" : "normal"}
           mouth={F >= 5620 && F < 5800 ? talk(F, 5630, 5790) : F >= T0 ? "smile" : "flat"}
-          extras={(p) => (uCarry ? <WordBrick x={(p.lHand.x + p.rHand.x) / 2 + 10} y={(p.lHand.y + p.rHand.y) / 2 - 8} label="" /> : null)}
+          extras={(p) => (uCarry ? <WordBrick x={(p.lHand.x + p.rHand.x) / 2 + 10} y={(p.lHand.y + p.rHand.y) / 2 - 8} label="下一段" /> : null)}
         />
         {F >= SUCCESS &&
           Array.from({ length: 16 }).map((_, i) => {

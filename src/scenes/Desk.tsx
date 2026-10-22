@@ -434,8 +434,8 @@ export const Desk: React.FC = () => {
       <Pop x={1500} y={680} start={4110} dur={26} text="！" size={90} color="#111" rot={0} frame={F} />
       <Pop x={1320} y={700} start={KEYCAP.pop} dur={28} text="咔——！" size={70} color="#111" frame={F} />
       <Pop x={1300} y={760} start={KEYCAP.slap} dur={34} text="啪！" size={96} color="#e03131" frame={F} />
-      {Array.from({ length: 10 }).map((_, i) => (
-        <Pop key={`ty${i}`} x={560 + (i % 4) * 260} y={1000 - (i % 2) * 30} start={4460 + i * 28} dur={20} text="哒哒哒哒" size={32} color="#111" rot={i % 2 ? 6 : -6} frame={F} />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Pop key={`ty${i}`} x={560 + (i % 4) * 260} y={1000 - (i % 2) * 30} start={4600 + i * 28} dur={20} text="哒哒哒哒" size={32} color="#111" rot={i % 2 ? 6 : -6} frame={F} />
       ))}
       <Pop x={1640} y={820} start={KEYCAP.inBin} dur={30} text="咚。" size={56} color="#111" rot={0} frame={F} />
       <Pop x={1100} y={980} start={6642} dur={24} text="Click" size={36} color="#111" rot={0} frame={F} />
