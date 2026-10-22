@@ -1,191 +1,228 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { Book, BrawlCloud, ImpactBurst, Slime, SmokePuff } from "../components/Effects";
+import { ImpactBurst, MindCursor, Plaque, RedX } from "../components/Effects";
 import {
+  ARMS_CROSS,
   DRAG,
-  FLAIL,
-  HUG_KNEES,
-  OVERHEAD,
-  POINT,
-  poseTrack,
-  STAND,
   idleSway,
+  offsetPose,
+  OVERHEAD,
+  Pose,
+  SHRINK,
+  SIT_DESK,
+  SIT_SLUMP,
+  STAND,
+  SWING_DOWN,
   walkCycle,
-  YELL,
 } from "../components/poses";
 import { Pop, SpeechBubble } from "../components/SpeechBubble";
 import { StickFigure } from "../components/StickFigure";
-import { ACTS, L } from "../timeline";
-import { C, hop, ip, lin, track } from "../utils";
-import { heroHead } from "./Desk";
-import { pointerStick } from "./Act1";
-import { LIE_Y, MS, STAND_Y, talk } from "./common";
+import { ACTS, HEARTBEAT, heartbeat, loopAt, LOOPS } from "../timeline";
+import { C, FONT, ip, lin, track } from "../utils";
+import { Chair, headY, moving, MS, SIT_Y, STAND_Y, talk } from "./common";
 
-const BLUE_X = 1160;
-export const CLOUD = { x: 960, y: 300 };
+const PQ = { x: 1200, y: 200, w: 440 };
+const RED_HOME = 1480;
+const BLUE_HOME = 640;
+const BLACK_X = 900;
 
-const walkPose = (f: number) => walkCycle(f, 12);
+/** mind-theater writing desk */
+export const MindDesk: React.FC<{ x: number; frame: number; glow?: boolean }> = ({ x, frame, glow = true }) => (
+  <g stroke="#111" strokeWidth={5} strokeLinecap="round">
+    <line x1={x - 60} y1={318} x2={x + 90} y2={318} />
+    <line x1={x - 50} y1={318} x2={x - 50} y2={432} />
+    <line x1={x + 80} y1={318} x2={x + 80} y2={432} />
+    <rect x={x - 6} y={262} width={78} height={52} rx={5} fill="#fff" strokeWidth={4} />
+    {glow && <rect x={x + 2} y={270} width={62} height={36} fill="#e7f5ff" stroke="none" opacity={0.6 + 0.4 * Math.sin(frame / 10)} />}
+  </g>
+);
 
 export const Act2: React.FC = () => {
-  const f = useCurrentFrame();
-  const G = f + ACTS.act2.from;
+  const F = useCurrentFrame() + ACTS.act2.from;
+  const lp = loopAt(F);
+  const idx = lp ? LOOPS.indexOf(lp) : -1;
+  const fast = idx >= 2;
+  const inHeart = F >= HEARTBEAT.from;
+  const beat = inHeart ? heartbeat(F) : 0;
 
-  // ---------------- RED ----------------
-  let redX: number;
-  let redFacing: 1 | -1 = 1;
-  let redPose = STAND;
-  let redRot = 0;
-  if (f < 750) {
-    redX = 780 + Math.sin(f / 40) * 70;
-    redFacing = Math.cos(f / 40) >= 0 ? 1 : -1;
-    redPose = f >= 440 && f < 530 ? YELL : f % 160 < 110 ? walkPose(f) : idleSway(POINT, f, 2.5);
-  } else if (f < 850) {
-    redX = ip(f, [750, 840], [780 + Math.sin(750 / 40) * 70, 470], lin);
-    redFacing = -1;
-    redPose = walkPose(f);
-  } else if (f < 930) {
-    redX = ip(f, [850, 930], [470, 880], lin);
-    redPose = poseTrack(f, [[850, DRAG], [855, DRAG]]);
-    redPose = { ...DRAG, lKnee: walkPose(f).lKnee, lFoot: walkPose(f).lFoot, rKnee: walkPose(f).rKnee, rFoot: walkPose(f).rFoot };
-  } else if (f < 1160) {
-    redX = 880;
-    redPose = poseTrack(f, [
-      [930, DRAG],
-      [955, OVERHEAD],
-      [968, OVERHEAD],
-      [985, YELL],
-      [1150, YELL],
-    ]);
-  } else {
-    redX = 880;
-    redPose = FLAIL;
-    redRot = f >= 1200 ? Math.sin(f * 0.6) * 12 : 0;
+  // ------------------------------------------------ RED track
+  const redKeys: [number, number][] = [[1600, RED_HOME]];
+  for (const [i, l] of LOOPS.entries()) {
+    if (l.killer !== "red") continue;
+    if (i === 0) {
+      redKeys.push([l.d0 - 70, RED_HOME], [l.d0 - 42, 1470], [l.d1 + 20, 1470], [l.d1 + 60, RED_HOME]);
+    }
   }
-  const redY = STAND_Y + (f >= 955 && f < 970 ? hop(f, 955, 970, 20) : 0);
-
-  // ---------------- BOOK ----------------
-  let book: { x: number; y: number; rot: number } | null = null;
-  const bookH = 230;
-  if (f >= 850 && f < 930) book = { x: redX - 64 - 70, y: L.ground - bookH / 2, rot: 0 };
-  else if (f >= 930 && f < 968) {
-    const t = ip(f, [930, 955], [0, 1]);
-    book = { x: track(t, [[0, 880 - 134], [1, 880]]), y: track(t, [[0, L.ground - bookH / 2], [1, STAND_Y - 200 - 60]]), rot: 90 * t };
-  } else if (f >= 968 && f < 986) {
-    const t = ip(f, [968, 985], [0, 1], (x) => x * x);
-    book = { x: 880 + (BLUE_X + 20 - 880) * t, y: STAND_Y - 260 + (L.ground - 110 - (STAND_Y - 260)) * t, rot: 90 + 25 * Math.sin(t * Math.PI) };
-  } else if (f >= 986 && f < 1150) book = { x: BLUE_X + 20, y: L.ground - 110, rot: 90 + Math.sin((f - 986) * 0.8) * ip(f, [986, 1010], [6, 0]) };
-  else if (f >= 1150) {
-    const t = ip(f, [1150, 1185], [0, 1]);
-    book = { x: BLUE_X + 20 + 150 * t, y: L.ground - 110 + 40 * t, rot: 90 + 8 * Math.sin(t * Math.PI) };
+  redKeys.push([2500, RED_HOME], [2540, 1470], [3140, 1470], [3180, 1400]);
+  const rx = track(F, redKeys);
+  // red pose
+  let rPose: Pose = idleSway(ARMS_CROSS, F, 2.5);
+  let holdX = false;
+  const redLoop = LOOPS.find((l) => l.killer === "red" && F >= l.d0 - 40 && F < l.d0 + 14);
+  if (fast && F < HEARTBEAT.from) {
+    rPose = idleSway(OVERHEAD, F, 2);
+    holdX = true;
   }
+  if (redLoop) {
+    const a = redLoop.d0 - 40;
+    rPose = F < redLoop.d0 - 8 ? idleSway(OVERHEAD, F, 2) : F < redLoop.d0 + 6 ? SWING_DOWN : OVERHEAD;
+    holdX = F < redLoop.d0 - 6 || fast;
+    if (F < a + 6) rPose = STAND;
+  }
+  if (moving(F, redKeys)) rPose = walkCycle(F, 10);
+  const rFacing: 1 | -1 = -1;
 
-  // ---------------- BLUE ----------------
-  const blueSquash = f >= 985 ? ip(f, [985, 990], [1, 0.35]) : 1;
-  const blueAlpha = f < 1150 ? 1 : ip(f, [1150, 1175], [1, 0]);
-  const slimeT = ip(f, [1165, 1235], [0, 1]);
-  const slimeX = BLUE_X + (redX - BLUE_X) * slimeT;
-  const slimeY = LIE_Y - 50 + (STAND_Y - 62 * MS - (LIE_Y - 50)) * slimeT;
+  // ------------------------------------------------ BLUE track
+  const blueKeys: [number, number][] = [[1600, BLUE_HOME]];
+  const l1 = LOOPS[1];
+  blueKeys.push(
+    [l1.d0 - 80, BLUE_HOME],
+    [l1.d0 - 66, 690],
+    [l1.d0 - 56, 690], // hesitate
+    [l1.d0 - 44, 760],
+    [l1.d0, 760],
+    [l1.d1, 640],
+    [2520, 640],
+    [2550, 760],
+  );
+  for (const [i, l] of LOOPS.entries()) {
+    if (i < 2 || l.killer !== "blue") continue;
+    blueKeys.push([l.d0, 760], [l.d1, 700], [l.d1 + 20, 760]);
+  }
+  blueKeys.push([3140, 760], [3170, 720]);
+  const ux = track(F, blueKeys);
+  let uPose: Pose = idleSway(SHRINK, F, 2);
+  const blueLoop = LOOPS.find((l) => l.killer === "blue" && F >= l.d0 - 40 && F < l.d1 + 10);
+  const roping = (blueLoop && F >= blueLoop.d0 - 40) || (fast && F < HEARTBEAT.from);
+  if (roping) uPose = offsetPose(SHRINK, { rElbow: { x: 10, y: -2 }, rHand: { x: 26, y: -8 } });
+  const pulling = blueLoop && F >= blueLoop.d0 && F < blueLoop.d1;
+  if (moving(F, blueKeys)) uPose = pulling ? offsetPose(walkCycle(F, 10), { head: { x: 12, y: 6 }, neck: { x: 8, y: 4 }, rHand: { x: 30, y: -22 }, rElbow: { x: 16, y: -12 }, lHand: { x: 28, y: -18 } }) : walkCycle(F, 12);
+  if (pulling && !moving(F, blueKeys)) uPose = DRAG;
+  const uFacing: 1 | -1 = pulling ? -1 : 1;
 
-  // ---------------- CLOUD ----------------
-  const cloudS = ip(f, [1355, 1395], [0, 1.15]);
-  const fightersAlpha = ip(f, [1360, 1378], [1, 0]);
+  // ------------------------------------------------ BLACK at desk
+  let bPose: Pose = SIT_DESK;
+  const typingNow = lp && F >= lp.t0 && F < lp.t1;
+  if (typingNow) {
+    const sh = idx < 2 ? Math.sin(F * 2.4) * 2 : 0;
+    bPose = offsetPose(SIT_DESK, {
+      lHand: { x: sh, y: -Math.abs(Math.sin(F * 0.8)) * 6 },
+      rHand: { x: -sh, y: -Math.abs(Math.sin(F * 0.8 + 1.6)) * 6 },
+    });
+  }
+  if (inHeart) bPose = SIT_SLUMP;
+  const bEyes = inHeart ? "closed" : lp && F >= lp.d0 ? "dizzy" : "sad";
 
-  // energy particles: thinking drains doing
-  const hh = heroHead(G);
+  // ------------------------------------------------ plaque / cursor
+  let plaqueText = "";
+  let plaqueT = -1;
+  let cursorX = PQ.x - PQ.w / 2 + 18;
+  if (lp) {
+    const typedN = Math.floor(ip(F, [lp.t0, lp.t1], [0, lp.text.length], lin));
+    plaqueText = lp.text.slice(0, typedN);
+    if (lp.killer === "red" && F >= lp.d0) plaqueT = F - lp.d0;
+    if (lp.killer === "blue" && F >= lp.d0) {
+      const n = lp.text.length - Math.floor(ip(F, [lp.d0, lp.d1], [0, lp.text.length], lin));
+      plaqueText = lp.text.slice(0, Math.max(0, n));
+    }
+    cursorX = PQ.x - PQ.w / 2 + 18 + plaqueText.length * 24;
+  }
+  const plaqueO = lp ? ip(F, [lp.t0, lp.t0 + 6, lp.d1, lp.d1 + 6], [0, 1, 1, 0]) : 0;
+
+  // blue's rope hand (global)
+  const handG = { x: ux + uFacing * (uPose.rHand.x * MS), y: STAND_Y + uPose.rHand.y * MS };
+  const ropeOn = roping && lp && F >= lp.t0;
+  const throwK = blueLoop ? ip(F, [blueLoop.d0 - 40, blueLoop.d0 - 25], [0, 1]) : 1;
+  const rope = ropeOn
+    ? {
+        x2: handG.x + (cursorX - handG.x) * throwK,
+        y2: handG.y + (PQ.y + 24 - handG.y) * throwK,
+      }
+    : null;
+  const sag = pulling ? 4 : 30;
+
+  // red X stamp
+  const stamp = LOOPS.find((l) => l.killer === "red" && F >= l.d0 - 2 && F < l.d0 + 28);
 
   return (
     <AbsoluteFill>
       <svg width={1920} height={1080} style={{ position: "absolute" }}>
-        {f >= 40 && f < 760 &&
-          Array.from({ length: 14 }).map((_, i) => {
-            const t = (((f - 40) / 70 + i / 14) % 1 + 1) % 1;
-            const x = 480 + (hh.x + 40 - 480) * Math.min(1, t * 2) + (t > 0.5 ? (960 - hh.x - 40) * (t - 0.5) * 2 : 0);
-            const y = 705 + (hh.y - 60 - 705) * Math.min(1, t * 2) + (t > 0.5 ? (360 - hh.y + 60) * (t - 0.5) * 2 : 0);
-            return <circle key={i} cx={x} cy={y} r={7 * (1 - t * 0.5)} fill={C.green} opacity={0.75 * (1 - t) * ip(f, [40, 80, 700, 760], [0, 1, 1, 0])} />;
-          })}
-        {/* grumble lightning between them */}
-        {f >= 300 && f < 750 && Math.floor(f / 6) % 3 !== 0 && (
-          <path d={`M${1000} ${300} l20 -24 l-6 24 l22 -20`} stroke="#868e96" strokeWidth={4} fill="none" strokeLinecap="round" />
-        )}
-        {f < 1175 && (
-          <StickFigure
-            pose={HUG_KNEES}
-            x={BLUE_X}
-            y={LIE_Y}
-            scale={MS}
-            scaleY={blueSquash}
-            rotate={f < 985 ? Math.sin(f / 11) * 7 : 0}
-            facing={-1}
-            color={C.blue}
-            eyes={f >= 985 ? "dizzy" : "sad"}
-            mouth={f >= 985 ? "open" : "frown"}
-            opacity={blueAlpha}
-          />
-        )}
-        {book && <Book x={book.x} y={book.y} rot={book.rot} h={bookH} />}
-        {f < 1378 && (
-          <StickFigure
-            pose={redPose}
-            x={redX}
-            y={redY}
-            scale={MS}
-            rotate={redRot}
-            facing={redFacing}
-            color={C.red}
-            glasses
-            eyes={f >= 1180 ? "wide" : "angry"}
-            mouth={f >= 1180 ? "open" : f >= 985 && f < 1150 ? talk(f, 985, 1150) : f >= 440 && f < 530 ? "open" : talk(f, 120, 280)}
-            opacity={fightersAlpha}
-            extras={(p) => (f < 750 ? pointerStick(p) : null)}
-          />
-        )}
-        {f >= 1165 && f < 1378 && (
-          <g opacity={fightersAlpha}>
-            <Slime x={slimeX} y={slimeY} frame={f} scale={ip(f, [1165, 1185], [0.3, 0.75])} />
+        <MindDesk x={1000} frame={F} />
+        <Chair x={BLACK_X} back={-1} />
+        {plaqueO > 0 && (
+          <g opacity={plaqueO}>
+            <Plaque x={PQ.x} y={PQ.y} w={PQ.w} text={plaqueText} t={plaqueT} />
           </g>
         )}
-        <ImpactBurst x={BLUE_X} y={L.ground - 70} t={f - 985} size={80} />
-        {cloudS > 0 && <BrawlCloud x={CLOUD.x} y={CLOUD.y} frame={f} scale={cloudS} />}
-        {f >= 1380 &&
-          Array.from({ length: 12 }).map((_, i) => (
-            <SmokePuff key={i} x={CLOUD.x + ((i % 3) - 1) * 120} y={CLOUD.y - 60} t={f - (1380 + i * 22)} seed={`c${i}`} />
-          ))}
-        {/* heartbeat vignette */}
-        {f >= 450 && f < 750 && (
-          <rect x={0} y={0} width={1920} height={1080} fill="url(#vig)" opacity={0.35 + 0.35 * Math.max(0, Math.sin(f * 0.3))} />
+        {lp && plaqueT < 0 && plaqueO > 0 && <MindCursor x={cursorX + 4} y={PQ.y + 24} h={50} blink={Math.floor(F / 8) % 2 === 0 || !!pulling} />}
+        {rope && (
+          <path
+            d={`M${handG.x} ${handG.y} Q ${(handG.x + rope.x2) / 2} ${(handG.y + rope.y2) / 2 + sag} ${rope.x2} ${rope.y2}`}
+            stroke="#8d6e63"
+            strokeWidth={5}
+            fill="none"
+            strokeLinecap="round"
+          />
         )}
-        <defs>
-          <radialGradient id="vig" cx="50%" cy="60%" r="70%">
-            <stop offset="60%" stopColor="#000" stopOpacity={0} />
-            <stop offset="100%" stopColor="#7a0000" stopOpacity={0.6} />
-          </radialGradient>
-        </defs>
-      </svg>
-
-      <SpeechBubble x={780} y={STAND_Y - 180} start={120} end={280} side="left" width={420} color={C.red} text="要引经据典！要有高度！" />
-      <SpeechBubble x={BLUE_X - 30} y={LIE_Y - 150} start={290} end={430} side="right" width={360} color={C.blue} text="好难啊……写不动……" />
-      <SpeechBubble x={780} y={STAND_Y - 180} start={440} end={535} side="left" width={380} color={C.red} shout text="删掉！太浅了！" />
-      <SpeechBubble x={BLUE_X - 30} y={LIE_Y - 150} start={560} end={720} side="right" width={380} color={C.blue} text="要不……先睡一会儿？" />
-      <Pop x={470} y={300} start={845} text="嘿咻——" size={36} color={C.red} dur={40} rot={0} />
-      <Pop x={BLUE_X} y={250} start={985} text="咚！！" size={80} />
-      <SpeechBubble x={850} y={STAND_Y - 180} start={992} end={1150} side="left" width={460} color={C.red} shout text="这句太俗！重写！立意要高！" />
-      <SpeechBubble x={1000} y={160} start={1210} end={1360} side="right" width={560} color={C.blue} text="写不出来！根本做不到！干脆摆烂重修吧！" />
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-        <Pop
-          key={i}
-          x={CLOUD.x + [-200, 210, -160, 190, -220, 230, -150, 200, -180][i]}
-          y={CLOUD.y + [-120, -90, 110, 90, -40, 30, -130, 120, 60][i]}
-          start={1400 + i * 28}
-          text={["砰！", "啪！", "嘭！", "咣！", "砰！", "啪！", "呼——", "咚！", "啪！"][i]}
-          size={50}
-          color={i % 2 ? C.blue : C.red}
-          rot={i % 2 ? 10 : -10}
+        {inHeart && <MindCursor x={1200} y={300 + beat * 20} h={120 * (1 + beat * 0.5)} />}
+        <StickFigure pose={bPose} x={BLACK_X} y={SIT_Y} scale={MS} color={C.black} eyes={bEyes} mouth={inHeart ? "frown" : "flat"} />
+        <StickFigure
+          pose={uPose}
+          x={ux}
+          y={STAND_Y}
+          scale={MS}
+          scaleY={0.93}
+          facing={uFacing}
+          color={C.blue}
+          eyes={pulling ? "closed" : "sad"}
+          mouth={blueLoop === LOOPS[1] ? talk(F, l1.d0 - 40, l1.d0 + 80) : "frown"}
         />
-      ))}
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-        <Pop key={`h${i}`} x={hh.x - 70} y={hh.y + 90} start={450 + i * 23} dur={14} text="咚" size={34} color="#c92a2a" rot={0} />
-      ))}
-      <SpeechBubble x={hh.x - 40} y={hh.y - 30} start={1500} end={1630} side="left" width={220} color="#868e96" fontSize={28} text="唉……" />
+        <StickFigure
+          pose={rPose}
+          x={rx}
+          y={STAND_Y}
+          scale={MS}
+          facing={rFacing}
+          color={C.red}
+          glasses
+          eyes="angry"
+          mouth={redLoop === LOOPS[0] ? talk(F, LOOPS[0].d0 - 20, LOOPS[0].d0 + 90) : "frown"}
+          extras={(p) =>
+            holdX ? <RedX x={(p.lHand.x + p.rHand.x) / 2} y={(p.lHand.y + p.rHand.y) / 2 - 22} size={26} rot={rPose === SWING_DOWN ? 30 : 0} /> : null
+          }
+        />
+        {stamp && (
+          <RedX x={PQ.x} y={PQ.y} size={ip(F, [stamp.d0 - 2, stamp.d0 + 4], [140, 90])} opacity={ip(F, [stamp.d0 + 18, stamp.d0 + 28], [1, 0])} rot={-6} />
+        )}
+        {stamp && <ImpactBurst x={PQ.x} y={PQ.y} t={F - stamp.d0} size={90} />}
+      </svg>
+      <SpeechBubble frame={F} x={1340} y={headY(STAND_Y) - 40} start={LOOPS[0].d0 + 4} end={LOOPS[0].d0 + 110} side="left" width={620} color={C.red} shout text="太庸俗！小学生文笔！删掉重写！" />
+      <SpeechBubble frame={F} x={780} y={headY(STAND_Y, -76) - 30} start={l1.d0 - 30} end={l1.d0 + 95} side="right" width={600} color={C.blue} text="太枯燥写不下去的，明早再写吧！" />
+      {LOOPS.map((l, i) =>
+        i >= 1 ? (
+          <Pop key={i} x={1200} y={292} start={l.d0} dur={Math.min(40, l.d1 - l.d0 + 14)} text={`重写 ×${i + 1}`} size={40} color="#868e96" rot={0} frame={F} />
+        ) : null,
+      )}
+      <Pop x={PQ.x} y={PQ.y} start={LOOPS[0].d0} dur={26} text="咔嚓！" size={64} color={C.red} frame={F} />
+      <Pop x={900} y={150} start={l1.d0 + 4} dur={30} text="嗖——" size={46} color={C.blue} frame={F} />
+      {inHeart && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            width: 1920,
+            top: 470,
+            textAlign: "center",
+            fontFamily: FONT,
+            fontSize: 30,
+            color: "#c92a2a",
+            fontWeight: 800,
+            opacity: ip(F, [HEARTBEAT.from + 60, HEARTBEAT.from + 90, 3760, 3790], [0, 0.85, 0.85, 0]),
+          }}
+        >
+          敲了 2500 次键盘，留下 0 个字。
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

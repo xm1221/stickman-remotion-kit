@@ -1,30 +1,30 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { ImpactBurst, Phone, Pillow, SmokePuff } from "../components/Effects";
+import { ImpactBurst, PaperBrick, Phone, SmokePuff } from "../components/Effects";
 import {
+  ADJUST_GLASSES,
   ARMS_CROSS,
-  FLAIL,
   HANDS_HIP,
-  KICK,
-  LIE_PHONE,
+  HIGH_FIVE,
+  idleSway,
   offsetPose,
-  PHONE_HOLD,
+  Pose,
   POINT,
   poseTrack,
+  PRESS_DOWN,
+  SHRINK,
+  SIT,
   STAND,
-  SWING_DOWN,
-  SWING_UP,
-  idleSway,
   walkCycle,
-  YELL,
 } from "../components/poses";
 import { Pop, SpeechBubble } from "../components/SpeechBubble";
 import { StickFigure } from "../components/StickFigure";
-import { C, hop, ip, lin, track } from "../utils";
-import { LIE_Y, MS, STAND_Y, talk } from "./common";
+import { ACTS } from "../timeline";
+import { C, FONT, ip, track } from "../utils";
+import { Chair, headY, moving, MS, SIT_Y, STAND_Y, talk } from "./common";
 
-/** teacher's pointer stick drawn from the hand along the forearm direction */
-export const pointerStick = (p: ReturnType<typeof poseTrack>, color = "#111") => {
+/** teacher's pointer stick (black) drawn from the hand along the forearm */
+export const pointerStick = (p: Pose, color = "#111") => {
   const dx = p.rHand.x - p.rElbow.x;
   const dy = p.rHand.y - p.rElbow.y;
   const n = Math.hypot(dx, dy) || 1;
@@ -36,192 +36,211 @@ export const pointerStick = (p: ReturnType<typeof poseTrack>, color = "#111") =>
   );
 };
 
-const BLUE_LIE_X = 1180;
-const PHONE0 = { x: BLUE_LIE_X + (LIE_PHONE.rHand.x + 4) * MS, y: LIE_Y + (LIE_PHONE.rHand.y - 6) * MS };
-const KICK_X = PHONE0.x - KICK.rFoot.x * MS;
-const RED_HEAD_Y = STAND_Y + STAND.head.y * MS;
+const BLACK_X: [number, number][] = [
+  [200, 520],
+  [250, 640],
+  [1500, 640],
+  [1585, 900],
+];
+const RED_X: [number, number][] = [
+  [240, 1100],
+  [755, 1100],
+  [775, 1152],
+  [860, 1152],
+  [945, 752],
+  [1465, 752],
+  [1560, 1480],
+];
+const BLUE_X: [number, number][] = [
+  [450, 1640],
+  [480, 1560],
+  [505, 1560],
+  [530, 1450],
+  [548, 1450],
+  [580, 1300],
+  [710, 1300],
+  [725, 1320],
+  [755, 1320],
+  [770, 1300],
+  [860, 1300],
+  [960, 530],
+  [1465, 530],
+  [1540, 640],
+];
 
 export const Act1: React.FC = () => {
-  const f = useCurrentFrame();
-  if (f < 280) {
-    const o = ip(f, [20, 60, 240, 280], [0, 1, 1, 0]);
-    return (
-      <AbsoluteFill>
-        <div
-          style={{
-            position: "absolute",
-            top: 200,
-            width: "100%",
-            textAlign: "center",
-            fontSize: 72,
-            fontWeight: 900,
-            color: "#111",
-            opacity: o,
-            fontFamily: '"Noto Serif CJK SC",serif',
-            letterSpacing: 12,
-          }}
-        >
-          《指针与光标》
-          <div style={{ fontSize: 28, fontWeight: 400, color: "#868e96", letterSpacing: 4, marginTop: 16 }}>
-            一个关于“想”与“做”的晚上
-          </div>
-        </div>
-      </AbsoluteFill>
-    );
+  const F = useCurrentFrame() + ACTS.act1.from;
+
+  const titleO = ip(F, [10, 40, 130, 160], [0, 1, 1, 0]);
+
+  // ---------------- BLACK (hero avatar)
+  const bx = track(F, BLACK_X);
+  const sitting = F >= 912 && F < 1470;
+  let bPose: Pose = moving(F, BLACK_X) ? walkCycle(F, 12) : idleSway(STAND, F, 2);
+  if (F >= 250 && F < 300) bPose = offsetPose(bPose, { head: { x: -8, y: 2 }, neck: { x: -4, y: 0 } });
+  if (sitting) {
+    const squirm = F > 1000 ? Math.sin(F / 6) * 3 : 0;
+    bPose = offsetPose(SIT, { head: { x: squirm, y: 2 }, lHand: { x: 0, y: squirm }, rHand: { x: 0, y: -squirm } });
   }
+  const bY = sitting ? SIT_Y : STAND_Y;
+  const bScale = ip(F, [200, 212], [0.2, MS]);
+  const bEyes = sitting ? (F > 1100 ? "dizzy" : "wide") : F >= 250 && F < 450 ? "wide" : F >= 1470 ? "sad" : "normal";
 
-  // ----- RED (完美怪) -----
-  const redX = track(f, [
-    [360, 960],
-    [395, 890],
-    [810, 890],
-    [858, KICK_X],
-    [962, KICK_X],
-    [968, KICK_X - 26],
-    [1000, KICK_X - 16],
+  // ---------------- RED (完美主义)
+  const rx = track(F, RED_X);
+  let rPose: Pose = poseTrack(F, [
+    [240, STAND],
+    [250, STAND],
+    [262, ADJUST_GLASSES],
+    [280, ADJUST_GLASSES],
+    [292, POINT],
+    [440, POINT],
+    [455, ARMS_CROSS],
+    [700, ARMS_CROSS],
+    [708, HANDS_HIP],
+    [755, HANDS_HIP],
+    [768, HIGH_FIVE],
+    [790, HIGH_FIVE],
+    [800, HANDS_HIP],
+    [945, HANDS_HIP],
+    [960, PRESS_DOWN],
+    [1460, PRESS_DOWN],
+    [1470, HANDS_HIP],
+    [1565, ARMS_CROSS],
   ]);
-  const redScale = ip(f, [360, 372], [0.2, MS]);
-  let redPose = poseTrack(f, [
-    [360, STAND],
-    [395, STAND],
-    [425, YELL],
-    [470, YELL],
-    [490, POINT],
-    [600, POINT],
-    [625, ARMS_CROSS],
-    [800, ARMS_CROSS],
-    [812, HANDS_HIP],
-    [858, KICK],
-    [890, KICK],
-    [905, HANDS_HIP],
-    [962, HANDS_HIP],
-    [966, FLAIL],
-    [990, FLAIL],
-    [1005, HANDS_HIP],
-  ]);
-  if (f >= 812 && f < 858) redPose = walkCycle(f, 10);
-  else if ((f >= 395 && f < 812) || (f >= 905 && f < 962) || (f >= 1005 && f < 1050)) redPose = idleSway(redPose, f, 2.5);
-  if (f >= 490 && f < 600) redPose = offsetPose(redPose, { rHand: { x: 0, y: Math.sin(f * 0.5) * 8 } });
-  const redRot = track(f, [
-    [962, 0],
-    [967, -24],
-    [985, -8],
-    [998, -26],
-    [1010, 0],
-  ]);
-  const redFacing = f < 805 ? -1 : 1;
-  const redEyes = f >= 964 && f < 1010 ? "closed" : f >= 425 ? "angry" : "normal";
-
-  // ----- BLUE (畏难怪) -----
-  const blueX = track(f, [
-    [360, 960],
-    [395, 1030],
-    [640, 1030],
-    [680, BLUE_LIE_X],
-    [905, BLUE_LIE_X],
-    [935, KICK_X + 112],
-  ]);
-  const blueY = track(f, [
-    [640, STAND_Y],
-    [680, LIE_Y],
-    [905, LIE_Y],
-    [930, STAND_Y],
-  ]) + hop(f, 905, 935, 70);
-  const blueScale = ip(f, [360, 372], [0.2, MS]);
-  const bluePose = poseTrack(f, [
-    [360, STAND],
-    [395, STAND],
-    [600, STAND],
-    [620, PHONE_HOLD],
-    [640, PHONE_HOLD],
-    [680, LIE_PHONE],
-    [905, LIE_PHONE],
-    [930, STAND],
-    [940, SWING_UP],
-    [958, SWING_UP],
-    [964, SWING_DOWN],
-    [980, SWING_UP],
-    [994, SWING_UP],
-    [1000, SWING_DOWN],
-    [1030, HANDS_HIP],
-  ]);
-  // 畏缩：站立时略蜷肩缩颈，不像轻松敢干
-  let bluePoseFinal = bluePose;
-  if (f >= 395 && f < 640) {
-    bluePoseFinal = idleSway(offsetPose(bluePose, {
-      head: { x: -4, y: 6 },
-      neck: { x: -2, y: 4 },
-      lElbow: { x: 6, y: 4 },
-      rElbow: { x: -4, y: 4 },
-      lHand: { x: 8, y: 2 },
-      rHand: { x: -2, y: 2 },
-    }), f, 2);
-  } else if (f >= 640 && f < 905) {
-    bluePoseFinal = bluePose; // lie / phone already passive
-  } else if (f >= 930) {
-    bluePoseFinal = idleSway(bluePose, f, 2);
-  } else {
-    bluePoseFinal = bluePose;
+  if (moving(F, RED_X)) rPose = walkCycle(F, 10);
+  else if (F < 945 || F > 1560) rPose = idleSway(rPose, F, 2.5);
+  if (F >= 960 && F < 1460) {
+    // one hand presses the shoulder, the other stuffs the paper brick
+    const push = Math.sin(F / 8) * 3;
+    rPose = offsetPose(rPose, { lHand: { x: 0, y: push }, rHand: { x: -6, y: 14 + push } });
   }
-  const blueFacing = f < 900 ? 1 : -1;
-  const hasPhone = f >= 620 && f < 862;
-  const hasPillow = f >= 935;
+  const rFacing: 1 | -1 = F < 700 ? -1 : F < 860 ? 1 : F < 1465 ? -1 : F < 1560 ? 1 : -1;
+  const rEyes = F >= 700 && F < 755 ? "angry" : F >= 755 && F < 860 ? "normal" : F >= 280 ? "angry" : "normal";
+  const rMouth = F >= 285 && F < 440 ? talk(F, 285, 440) : F >= 765 && F < 860 ? "grin" : F >= 960 && F < 1460 ? "grin" : "flat";
+  const rScale = ip(F, [240, 252], [0.2, MS]);
 
-  // flying phone
-  const phoneT = ip(f, [862, 905], [0, 1], lin);
-  const phoneX = PHONE0.x + (1680 - PHONE0.x) * phoneT;
-  const phoneY = PHONE0.y + (80 - PHONE0.y) * phoneT + hop(f, 862, 905, 140);
-  const startY = (y: number) => y + hop(f, 360, 395, 110);
+  // ---------------- BLUE (畏难逃避) — timid: shrinks, hesitates
+  const ux = track(F, BLUE_X);
+  let uPose: Pose = SHRINK;
+  if (moving(F, BLUE_X)) uPose = walkCycle(F, 12);
+  if (F >= 548 && F < 700) uPose = offsetPose(SHRINK, { rElbow: { x: 10, y: -4 }, rHand: { x: 18, y: -12 } });
+  if (F >= 700 && F < 755) uPose = offsetPose(SHRINK, { head: { x: -6, y: 6 }, neck: { x: -3, y: 4 } });
+  if (F >= 760 && F < 795) uPose = HIGH_FIVE;
+  if (F >= 795 && F < 860) uPose = idleSway(HANDS_HIP, F, 2);
+  if (F >= 960 && F < 1460) {
+    uPose = offsetPose(PRESS_DOWN, {
+      rElbow: { x: -6, y: -8 },
+      rHand: { x: -22, y: -28 + Math.sin(F / 9) * 3 },
+    });
+  }
+  if (!moving(F, BLUE_X) && !(F >= 960 && F < 1460)) uPose = idleSway(uPose, F, 2);
+  const uFacing: 1 | -1 = F < 860 ? -1 : 1;
+  const uScaleY = F >= 760 && F < 860 ? 1 : 0.93; // shrunk posture
+  const uEyes = F >= 760 && F < 860 ? "up" : F >= 700 && F < 755 ? "wide" : "sad";
+  const uMouth = F >= 552 && F < 700 ? talk(F, 552, 700) : F >= 765 && F < 860 ? "grin" : F >= 960 && F < 1460 ? "smile" : "frown";
+  const uPhone = F >= 540 && F < 1460;
+
+  const chairO = ip(F, [898, 912, 1470, 1490], [0, 1, 1, 0]);
+  const goalO = ip(F, [210, 240, 840, 870], [0, 1, 1, 0]);
+  const capO = ip(F, [780, 800, 990, 1010], [0, 1, 1, 0]);
+  const brickOnLap = F >= 1000 && F < 1470;
 
   return (
     <AbsoluteFill>
+      {titleO > 0 && (
+        <div style={{ position: "absolute", top: 150, width: "100%", textAlign: "center", opacity: titleO, fontFamily: FONT }}>
+          <div style={{ fontSize: 84, fontWeight: 900, letterSpacing: 14, color: "#111" }}>《指针与光标》</div>
+          <div style={{ fontSize: 34, color: "#e03131", fontWeight: 900, letterSpacing: 6, marginTop: 18 }}>2.0 · 拔掉退格键</div>
+        </div>
+      )}
       <svg width={1920} height={1080} style={{ position: "absolute" }}>
+        {/* the assignment waiting on the right */}
+        {goalO > 0 && (
+          <g opacity={goalO} transform={`translate(1450 ${376 + Math.sin(F / 15) * 4})`}>
+            <rect x={-34} y={-44} width={68} height={88} rx={4} fill="#fff" stroke="#111" strokeWidth={4} />
+            {[0, 1, 2].map((i) => (
+              <line key={i} x1={-20} y1={-20 + i * 16} x2={20} y2={-20 + i * 16} stroke="#adb5bd" strokeWidth={3} />
+            ))}
+            <text x={0} y={70} textAnchor="middle" fontSize={20} fontWeight={800} fontFamily={FONT} fill="#495057">
+              作业
+            </text>
+          </g>
+        )}
+        <Chair x={640} back={-1} opacity={chairO} />
+        {/* blue behind black when passing */}
+        {F >= 450 && (
+          <StickFigure
+            pose={uPose}
+            x={ux}
+            y={STAND_Y}
+            scale={MS}
+            scaleY={uScaleY}
+            facing={uFacing}
+            color={C.blue}
+            eyes={uEyes}
+            mouth={uMouth}
+            extras={(p) => (uPhone ? <Phone x={p.rHand.x + 2} y={p.rHand.y - 8} frame={F} /> : null)}
+          />
+        )}
+        {F >= 200 && (
+          <StickFigure
+            pose={bPose}
+            x={bx}
+            y={bY}
+            scale={bScale}
+            color={C.black}
+            eyes={bEyes}
+            mouth={sitting ? "frown" : F >= 250 && F < 440 ? "open" : "flat"}
+            extras={() => (brickOnLap ? <PaperBrick x={30} y={-6} s={0.8} /> : null)}
+          />
+        )}
+        {F >= 240 && (
+          <StickFigure
+            pose={rPose}
+            x={rx}
+            y={STAND_Y}
+            scale={rScale}
+            facing={rFacing}
+            color={C.red}
+            glasses
+            glassesTilt={F >= 255 && F < 285 ? -14 : 0}
+            eyes={rEyes}
+            mouth={rMouth}
+            extras={(p) => (
+              <>
+                {F >= 285 && F < 445 && pointerStick(p)}
+                {F >= 930 && F < 1000 && <PaperBrick x={p.rHand.x} y={p.rHand.y + 8} s={0.6} />}
+              </>
+            )}
+          />
+        )}
         {[0, 1, 2, 3].map((i) => (
-          <SmokePuff key={i} x={930 + i * 30} y={400} t={f - 360 - i * 2} seed={`e${i}`} dark={false} />
+          <SmokePuff key={i} x={1080 + i * 24} y={400} t={F - 240 - i * 2} seed={`r${i}`} dark={false} />
         ))}
-        <StickFigure
-          pose={bluePoseFinal}
-          x={blueX}
-          y={f < 395 ? startY(STAND_Y) : blueY}
-          scale={blueScale}
-          facing={blueFacing}
-          color={C.blue}
-          eyes={f >= 862 && f < 905 ? "wide" : f >= 905 ? "angry" : f >= 680 ? "closed" : f >= 620 ? "sad" : "sad"}
-          mouth={f >= 640 && f < 862 ? "flat" : f >= 905 ? "grit" : talk(f, 640, 800) === "open" ? "open" : "frown"}
-          extras={(p) => (
-            <>
-              {hasPhone && <Phone x={p.rHand.x + 4} y={p.rHand.y - 6} frame={f} />}
-              {hasPillow && <Pillow x={(p.lHand.x + p.rHand.x) / 2} y={(p.lHand.y + p.rHand.y) / 2 - 14} rot={p.rHand.y < -90 ? -20 : 30} />}
-            </>
-          )}
-        />
-        <StickFigure
-          pose={redPose}
-          x={redX}
-          y={f < 395 ? startY(STAND_Y) : STAND_Y}
-          scale={redScale}
-          rotate={redRot}
-          facing={redFacing}
-          color={C.red}
-          glasses
-          eyes={redEyes}
-          mouth={f >= 425 && f < 600 ? talk(f, 425, 600) : f >= 800 ? "frown" : "flat"}
-          extras={(p) => (f >= 425 && f < 812 ? pointerStick(p) : null)}
-        />
-        {f >= 862 && f < 905 && <Phone x={phoneX} y={phoneY} rot={(f - 862) * 25} frame={f} />}
-        <ImpactBurst x={PHONE0.x} y={PHONE0.y} t={f - 860} />
-        <ImpactBurst x={KICK_X + 10} y={RED_HEAD_Y} t={f - 964} />
-        <ImpactBurst x={KICK_X + 10} y={RED_HEAD_Y} t={f - 1000} />
+        <ImpactBurst x={1226} y={STAND_Y - 118 * MS} t={F - 772} size={70} />
+        <ImpactBurst x={690} y={360} t={F - 1000} size={40} />
+        {capO > 0 && (
+          <g opacity={capO} fontFamily={FONT} fontWeight={900} textAnchor="middle">
+            <text x={960} y={92} fontSize={42}>
+              <tspan fill={C.red}>高标准</tspan>
+              <tspan fill="#111"> + </tspan>
+              <tspan fill={C.blue}>低行动</tspan>
+              <tspan fill="#111"> = 完美合谋</tspan>
+            </text>
+          </g>
+        )}
       </svg>
-      <Pop x={960} y={360} start={360} text="嘭！" size={48} />
-      <SpeechBubble x={870} y={RED_HEAD_Y - 40} start={440} end={605} side="left" width={560} color={C.red} shout text="慢着！第一句不够深刻震撼怎么行？必须先通读三本原著！" />
-      <SpeechBubble x={1080} y={RED_HEAD_Y - 30} start={630} end={800} side="right" width={520} color={C.blue} text="就是就是，既然任务这么宏大，先刷 10 分钟短视频找灵感嘛～" />
-      <SpeechBubble x={KICK_X - 10} y={RED_HEAD_Y - 40} start={806} end={852} side="left" width={160} color={C.red} shout text="哼！" />
-      <Pop x={PHONE0.x + 40} y={PHONE0.y - 70} start={862} text="砰！" size={60} />
-      <Pop x={1500} y={110} start={890} text="我的手机——" size={30} color={C.blue} dur={30} rot={0} />
-      <Pop x={KICK_X - 30} y={RED_HEAD_Y - 70} start={964} text="啪！" size={60} color={C.blue} />
-      <Pop x={KICK_X - 60} y={RED_HEAD_Y - 80} start={1000} text="啪！！" size={66} color={C.blue} />
-      <Pop x={720} y={640} start={455} text="？" size={56} dur={40} />
+      <Pop x={1100} y={300} start={240} text="嘭！" size={48} frame={F} />
+      <SpeechBubble frame={F} x={1080} y={headY(STAND_Y) - 40} start={290} end={440} side="left" width={560} color={C.red} shout text="慢着！格局太小！先看完 20 篇核心文献！" />
+      <Pop x={600} y={170} start={300} dur={40} text="？！" size={50} frame={F} />
+      <SpeechBubble frame={F} x={1290} y={headY(STAND_Y, -76) - 30} start={555} end={700} side="left" width={600} color={C.blue} text="对对对！文献太难了，先刷会儿短视频补补多巴胺！" />
+      <Pop x={1210} y={240} start={705} dur={40} text="VS" size={60} color="#868e96" rot={0} frame={F} />
+      <Pop x={1226} y={110} start={772} dur={30} text="啪！" size={64} color="#111" frame={F} />
+      <Pop x={640} y={300} start={900} dur={22} text="嘭" size={40} frame={F} />
+      <Pop x={720} y={300} start={1000} dur={26} text="咚！" size={44} color={C.red} frame={F} />
+      <Pop x={560} y={180} start={1040} dur={60} text="刷刷刷～" size={34} color={C.blue} rot={0} frame={F} />
+      <Pop x={760} y={180} start={1120} dur={60} text="读完再写！" size={34} color={C.red} rot={0} frame={F} />
     </AbsoluteFill>
   );
 };

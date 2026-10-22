@@ -332,3 +332,356 @@ export const Pillow: React.FC<{ x: number; y: number; rot?: number }> = ({ x, y,
     <path d="M-12 -4 l8 6 M6 -6 l8 8" stroke="#74c0fc" strokeWidth={3} />
   </g>
 );
+
+// ======================================================= 2.0 additions
+const CJK = '"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif';
+
+/** sparks burst (frame-driven, deterministic) */
+export const Sparks: React.FC<{ x: number; y: number; frame: number; n?: number; size?: number; seed?: string }> = ({
+  x,
+  y,
+  frame,
+  n = 10,
+  size = 40,
+  seed = "sp",
+}) => {
+  const ph = Math.floor(frame / 3);
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      {Array.from({ length: n }).map((_, i) => {
+        const a = -Math.PI / 2 + (R(`${seed}a${i}-${ph}`) - 0.5) * Math.PI * 1.6;
+        const r0 = size * 0.25 + R(`${seed}r${i}-${ph}`) * size * 0.3;
+        const r1 = r0 + size * (0.35 + R(`${seed}l${i}-${ph}`) * 0.6);
+        const col = i % 3 === 0 ? "#ffd43b" : i % 3 === 1 ? "#ff922b" : "#e03131";
+        return (
+          <line
+            key={i}
+            x1={Math.cos(a) * r0}
+            y1={Math.sin(a) * r0}
+            x2={Math.cos(a) * r1}
+            y2={Math.sin(a) * r1}
+            stroke={col}
+            strokeWidth={size * 0.07 + 1}
+            strokeLinecap="round"
+          />
+        );
+      })}
+      <Star x={0} y={-size * 0.15} size={size * 0.22} color="#ffd43b" rot={frame * 20} />
+    </g>
+  );
+};
+
+/** giant red ❌ */
+export const RedX: React.FC<{ x: number; y: number; size?: number; rot?: number; opacity?: number }> = ({
+  x,
+  y,
+  size = 120,
+  rot = 0,
+  opacity = 1,
+}) => (
+  <g transform={`translate(${x} ${y}) rotate(${rot})`} opacity={opacity}>
+    {[
+      [-1, -1, 1, 1],
+      [1, -1, -1, 1],
+    ].map(([a, b, c, d], i) => (
+      <g key={i}>
+        <line x1={a * size} y1={b * size} x2={c * size} y2={d * size} stroke="#111" strokeWidth={size * 0.32} strokeLinecap="round" />
+        <line x1={a * size} y1={b * size} x2={c * size} y2={d * size} stroke="#e03131" strokeWidth={size * 0.24} strokeLinecap="round" />
+      </g>
+    ))}
+  </g>
+);
+
+/** I-beam text cursor as a physical prop in the mind theater */
+export const MindCursor: React.FC<{ x: number; y: number; h?: number; rot?: number; blink?: boolean }> = ({
+  x,
+  y,
+  h = 120,
+  rot = 0,
+  blink = true,
+}) => (
+  <g transform={`translate(${x} ${y}) rotate(${rot})`} opacity={blink ? 1 : 0.35}>
+    <line x1={0} y1={-h} x2={0} y2={0} stroke="#111" strokeWidth={12} strokeLinecap="round" />
+    <line x1={-20} y1={-h} x2={20} y2={-h} stroke="#111" strokeWidth={10} strokeLinecap="round" />
+    <line x1={-20} y1={0} x2={20} y2={0} stroke="#111" strokeWidth={10} strokeLinecap="round" />
+  </g>
+);
+
+/** floating sentence plaque (mirror of what is typed), can shatter */
+export const Plaque: React.FC<{ x: number; y: number; text: string; t?: number; w?: number; color?: string }> = ({
+  x,
+  y,
+  text,
+  t = -1,
+  w = 440,
+  color = "#111",
+}) => {
+  const h = 62;
+  if (t < 0)
+    return (
+      <g transform={`translate(${x} ${y})`}>
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={12} fill="#fff" stroke={color} strokeWidth={4} />
+        <text x={-w / 2 + 18} y={9} fontSize={24} fontWeight={700} fontFamily={CJK} fill={color}>
+          {text}
+        </text>
+      </g>
+    );
+  if (t > 40) return null;
+  const n = 6;
+  return (
+    <g transform={`translate(${x} ${y})`} opacity={1 - t / 40}>
+      {Array.from({ length: n }).map((_, i) => {
+        const pw = w / n;
+        const px = -w / 2 + i * pw;
+        const vx = (i - n / 2 + 0.5) * 5 + (R(`pq${i}`) - 0.5) * 4;
+        const vy = -6 - R(`pqv${i}`) * 6;
+        const dx = vx * t;
+        const dy = vy * t + 0.6 * t * t;
+        return (
+          <g key={i} transform={`translate(${dx} ${dy}) rotate(${(R(`pqr${i}`) - 0.5) * 30 * t * 0.2} ${px + pw / 2} 0)`}>
+            <rect x={px} y={-h / 2} width={pw - 4} height={h} fill="#fff" stroke={color} strokeWidth={3} />
+          </g>
+        );
+      })}
+    </g>
+  );
+};
+
+/** stack of papers ("文献砖头") */
+export const PaperBrick: React.FC<{ x: number; y: number; rot?: number; s?: number }> = ({ x, y, rot = 0, s = 1 }) => (
+  <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
+    {[0, 1, 2, 3, 4].map((i) => (
+      <rect key={i} x={-34 + (i % 2) * 3} y={-8 - i * 7} width={68} height={8} fill="#fff" stroke="#e03131" strokeWidth={2.5} />
+    ))}
+    <text x={0} y={-48} textAnchor="middle" fontSize={15} fontWeight={900} fontFamily={CJK} fill="#e03131">
+      20篇文献
+    </text>
+  </g>
+);
+
+/** Backspace keycap (local origin = centre) */
+export const Keycap: React.FC<{ x: number; y: number; w?: number; h?: number; rot?: number; s?: number; glow?: number }> = ({
+  x,
+  y,
+  w = 74,
+  h = 28,
+  rot = 0,
+  s = 1,
+  glow = 0,
+}) => (
+  <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
+    {glow > 0 && <rect x={-w / 2 - 8} y={-h / 2 - 8} width={w + 16} height={h + 16} rx={10} fill="#ff6b6b" opacity={glow * 0.6} />}
+    <rect x={-w / 2} y={-h / 2 + 4} width={w} height={h} rx={5} fill="#adb5bd" stroke="#111" strokeWidth={2.5} />
+    <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={5} fill="#fff" stroke="#111" strokeWidth={2.5} />
+    <text x={0} y={h * 0.18} textAnchor="middle" fontSize={h * 0.46} fontWeight={800} fontFamily={CJK} fill="#111">
+      ← Backspace
+    </text>
+  </g>
+);
+
+/** 完美高墙: bricks build up (built = number of bricks), collapse after impact (t frames) */
+export const StandardWall: React.FC<{
+  x: number;
+  ground: number;
+  built: number;
+  t?: number;
+  label?: number;
+  cols?: number;
+  rows?: number;
+}> = ({ x, ground, built, t = -1, label = 0, cols = 6, rows = 6 }) => {
+  const bw = 62;
+  const bh = 34;
+  const left = x - (cols * bw) / 2;
+  const bricks: React.ReactNode[] = [];
+  let idx = 0;
+  for (let r = 0; r < rows; r++) {
+    const off = r % 2 ? bw / 2 : 0;
+    const n = r % 2 ? cols - 1 : cols;
+    for (let c = 0; c < n; c++) {
+      if (idx >= built) break;
+      const bx = left + off + c * bw + bw / 2;
+      const by = ground - bh / 2 - r * bh;
+      let dx = 0;
+      let dy = 0;
+      let rot = 0;
+      if (t >= 0) {
+        const tt = Math.max(0, t - R(`wd${idx}`) * 6);
+        const vx = 3 + R(`wvx${idx}`) * 9 + r * 0.8;
+        const vy = -3 - R(`wvy${idx}`) * 7;
+        const rest = ground - bh / 2 - R(`wr${idx}`) * 26;
+        const tl = (-vy + Math.sqrt(vy * vy + 2 * 1.1 * Math.max(0, rest - by))) / 1.1;
+        const tc = Math.min(tt, tl);
+        dx = vx * tc;
+        dy = vy * tc + 0.55 * tc * tc;
+        if (by + dy > rest) dy = rest - by;
+        rot = (R(`wrot${idx}`) - 0.5) * 16 * tc;
+      }
+      bricks.push(
+        <g key={idx} transform={`translate(${bx + dx} ${by + dy}) rotate(${rot})`}>
+          <rect x={-bw / 2 + 1} y={-bh / 2 + 1} width={bw - 2} height={bh - 2} rx={3} fill="#ffe3e3" stroke="#e03131" strokeWidth={3} />
+        </g>,
+      );
+      idx++;
+    }
+  }
+  const topY = ground - rows * bh;
+  const signFall = t >= 0 ? Math.min(t, 26) : 0;
+  return (
+    <g>
+      {bricks}
+      {label > 0 && (
+        <g
+          opacity={label}
+          transform={`translate(${x + Math.min(signFall * 4, 60)} ${topY + 58 + Math.min(signFall * signFall * 0.4, ground - 30 - topY - 58)}) rotate(${Math.min(signFall * 1.2, 10)})`}
+        >
+          <rect x={-170} y={-28} width={340} height={56} rx={6} fill="#fff" stroke="#e03131" strokeWidth={4} />
+          <text x={0} y={12} textAnchor="middle" fontSize={32} fontWeight={900} fontFamily={CJK} fill="#e03131">
+            惊世神作才准动笔
+          </text>
+        </g>
+      )}
+    </g>
+  );
+};
+
+/** 黑色铁球 = 粗糙的初稿 */
+export const IronBall: React.FC<{ x: number; y: number; r?: number; rot?: number; speed?: number }> = ({
+  x,
+  y,
+  r = 78,
+  rot = 0,
+  speed = 0,
+}) => (
+  <g transform={`translate(${x} ${y})`}>
+    {speed > 0 &&
+      [-0.5, 0, 0.5].map((k, i) => (
+        <line key={i} x1={-r - 20} y1={k * r} x2={-r - 20 - speed * 14} y2={k * r} stroke="#495057" strokeWidth={6} strokeLinecap="round" opacity={0.6} />
+      ))}
+    <circle r={r} fill="#111" />
+    <path d={`M${-r * 0.55} ${-r * 0.35} q${r * 0.25} ${-r * 0.4} ${r * 0.62} ${-r * 0.36}`} stroke="#fff" strokeWidth={6} fill="none" strokeLinecap="round" opacity={0.55} />
+    <g transform={`rotate(${rot})`} fontFamily={CJK} fill="#fff" fontWeight={900} textAnchor="middle">
+      <text y={-8} fontSize={r * 0.26}>
+        第一段：
+      </text>
+      <text y={r * 0.3} fontSize={r * 0.22}>
+        为什么我们总在空想？
+      </text>
+    </g>
+  </g>
+);
+
+/** 完美橡皮擦, shatters when t >= 0 */
+export const Eraser: React.FC<{ x: number; y: number; rot?: number; t?: number; s?: number }> = ({ x, y, rot = 0, t = -1, s = 1 }) => {
+  const w = 130;
+  const h = 58;
+  if (t < 0)
+    return (
+      <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={10} fill="#fff" stroke="#e03131" strokeWidth={4} />
+        <rect x={-w / 2 + 34} y={-h / 2} width={48} height={h} fill="#ffc9c9" stroke="#e03131" strokeWidth={3} />
+        <text x={0} y={-h / 2 - 10} textAnchor="middle" fontSize={20} fontWeight={900} fontFamily={CJK} fill="#e03131">
+          完美橡皮擦
+        </text>
+      </g>
+    );
+  if (t > 45) return null;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`} opacity={1 - t / 45}>
+      {Array.from({ length: 8 }).map((_, i) => {
+        const a = (i / 8) * Math.PI * 2 + R(`er${i}`);
+        const v = 6 + R(`erv${i}`) * 6;
+        return (
+          <polygon
+            key={i}
+            points="-12,-10 14,-6 8,12 -10,8"
+            fill={i % 2 ? "#ffc9c9" : "#fff"}
+            stroke="#e03131"
+            strokeWidth={3}
+            transform={`translate(${Math.cos(a) * v * t} ${Math.sin(a) * v * t + 0.4 * t * t}) rotate(${t * 18 * (i % 2 ? 1 : -1)})`}
+          />
+        );
+      })}
+    </g>
+  );
+};
+
+export const Zzz: React.FC<{ x: number; y: number; frame: number; color?: string }> = ({ x, y, frame, color = "#1c7ed6" }) => (
+  <g fontFamily={CJK} fontWeight={900} fill={color}>
+    {[0, 1, 2].map((i) => {
+      const t = ((frame + i * 20) % 60) / 60;
+      return (
+        <text key={i} x={x + t * 40 + i * 8} y={y - t * 70} fontSize={18 + i * 8} opacity={1 - t}>
+          Z
+        </text>
+      );
+    })}
+  </g>
+);
+
+/** word brick for the Act4 assembly line */
+export const WordBrick: React.FC<{ x: number; y: number; label: string; painted?: number; rot?: number }> = ({
+  x,
+  y,
+  label,
+  painted = 0,
+  rot = 0,
+}) => (
+  <g transform={`translate(${x} ${y}) rotate(${rot})`}>
+    <rect x={-46} y={-17} width={92} height={34} rx={4} fill="#f1f3f5" stroke="#495057" strokeWidth={3} />
+    {painted > 0 && (
+      <rect x={-46} y={-17} width={92 * painted} height={34} rx={4} fill="#d3f9d8" stroke="#2f9e44" strokeWidth={3} />
+    )}
+    <text x={0} y={7} textAnchor="middle" fontSize={17} fontWeight={800} fontFamily={CJK} fill={painted >= 1 ? "#2b8a3e" : "#495057"}>
+      {label}
+    </text>
+  </g>
+);
+
+/** 内耗计分板 (HTML, panel-space) */
+export const Scoreboard: React.FC<{ x: number; y: number; frame: number; start: number; end: number; keys: number; burn: number; words: number }> = ({
+  x,
+  y,
+  frame,
+  start,
+  end,
+  keys,
+  burn,
+  words,
+}) => {
+  if (frame < start || frame > end) return null;
+  const t = frame - start;
+  const s = t < 10 ? 0.5 + (t / 10) * 0.6 : 1.1 - Math.min(0.1, (t - 10) * 0.02);
+  const o = Math.min(1, (end - frame) / 8);
+  const row = (k: string, v: string, col: string) => (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 24, fontSize: 26, lineHeight: "40px" }}>
+      <span style={{ color: "#495057" }}>{k}</span>
+      <span style={{ fontFamily: '"Noto Sans Mono CJK SC",monospace', fontWeight: 900, color: col }}>{v}</span>
+    </div>
+  );
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        width: 440,
+        transform: `scale(${s})`,
+        transformOrigin: "100% 100%",
+        opacity: o,
+        background: "#fff",
+        border: "5px solid #111",
+        borderRadius: 14,
+        padding: "10px 20px 12px",
+        fontFamily: CJK,
+        boxShadow: "6px 7px 0 rgba(0,0,0,0.18)",
+      }}
+    >
+      <div style={{ fontSize: 24, fontWeight: 900, color: "#e03131", borderBottom: "3px solid #111", marginBottom: 6, paddingBottom: 4 }}>
+        ▣ 内耗计分板
+      </div>
+      {row("累计敲击键盘", `${keys} 次`, "#111")}
+      {row("消耗脑细胞/精力", `${burn}%`, "#f08c00")}
+      {row("当前文档剩余字数", `${words} 字`, "#e03131")}
+    </div>
+  );
+};

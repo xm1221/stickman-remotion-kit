@@ -14,8 +14,10 @@ export const SpeechBubble: React.FC<{
   fontSize?: number;
   shout?: boolean;
   dy?: number;
-}> = ({ x, y, start, end, text, color = "#111", side = "right", width = 420, fontSize = 30, shout = false, dy = 26 }) => {
-  const frame = useCurrentFrame();
+  frame?: number;
+}> = ({ x, y, start, end, text, color = "#111", side = "right", width = 420, fontSize = 30, shout = false, dy = 26, frame: fr }) => {
+  const cf = useCurrentFrame();
+  const frame = fr ?? cf;
   const { fps } = useVideoConfig();
   if (frame < start || frame > end) return null;
   const pop = spring({ frame: frame - start, fps, config: { damping: 11, stiffness: 180 } });
@@ -71,7 +73,7 @@ export const SpeechBubble: React.FC<{
 };
 
 /** Big comic onomatopoeia text */
-export const Pop: React.FC<{ x: number; y: number; start: number; dur?: number; text: string; color?: string; size?: number; rot?: number }> = ({
+export const Pop: React.FC<{ x: number; y: number; start: number; dur?: number; text: string; color?: string; size?: number; rot?: number; frame?: number }> = ({
   x,
   y,
   start,
@@ -80,8 +82,10 @@ export const Pop: React.FC<{ x: number; y: number; start: number; dur?: number; 
   color = "#111",
   size = 54,
   rot = -8,
+  frame: fr,
 }) => {
-  const frame = useCurrentFrame();
+  const cf = useCurrentFrame();
+  const frame = fr ?? cf;
   const t = frame - start;
   if (t < 0 || t > dur) return null;
   const s = t < 5 ? 0.4 + (t / 5) * 0.9 : 1.3 - Math.min(0.3, (t - 5) * 0.04);

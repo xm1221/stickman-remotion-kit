@@ -1,7 +1,7 @@
 import React from "react";
 import { Pose, Pt } from "./poses";
 
-export type Eyes = "normal" | "angry" | "dizzy" | "closed" | "wide" | "up" | "sad";
+export type Eyes = "normal" | "angry" | "dizzy" | "closed" | "wide" | "up" | "sad" | "determined";
 export type Mouth = "smile" | "frown" | "flat" | "open" | "grit" | "grin" | "none";
 
 export type StickFigureProps = {
@@ -88,6 +88,13 @@ export const StickFigure: React.FC<StickFigureProps> = ({
             <circle cx={ex} cy={ey} r={1.8} fill={color} />
           </g>
         );
+      case "determined":
+        return (
+          <g>
+            <circle cx={ex} cy={ey} r={3.4} fill={color} />
+            <circle cx={ex + 1.2} cy={ey - 1.2} r={1.4} fill="#ff2d2d" />
+          </g>
+        );
       case "up":
         return <circle cx={ex} cy={ey - 3} r={2.8} fill={color} />;
       default:
@@ -101,6 +108,13 @@ export const StickFigure: React.FC<StickFigureProps> = ({
         <g stroke={color} strokeWidth={3} strokeLinecap="round">
           <line x1={-2} y1={-12} x2={6} y2={-8} />
           <line x1={18} y1={-12} x2={10} y2={-8} />
+        </g>
+      );
+    if (eyes === "determined")
+      return (
+        <g stroke={color} strokeWidth={5} strokeLinecap="round">
+          <line x1={-4} y1={-13} x2={7} y2={-7} />
+          <line x1={20} y1={-13} x2={9} y2={-7} />
         </g>
       );
     if (eyes === "sad")

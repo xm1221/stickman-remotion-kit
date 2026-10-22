@@ -508,3 +508,164 @@ export const SIT_LEAN_BACK = mk(
   },
   SIT,
 );
+
+// ================= 2.0 additions =================
+/** 击掌合谋：一只手高举向前 */
+export const HIGH_FIVE = mk(
+  {
+    head: p(10, -86),
+    neck: p(6, -62),
+    rElbow: p(30, -84),
+    rHand: p(46, -118),
+    lElbow: p(-14, -36),
+    lHand: p(-10, -10),
+    rKnee: p(14, 30),
+    rFoot: p(26, 62),
+  },
+  STAND,
+);
+
+/** 胆怯缩身：低头耸肩、双手抱在胸前 */
+export const SHRINK = mk(
+  {
+    head: p(-6, -76),
+    neck: p(-3, -56),
+    lElbow: p(8, -32),
+    lHand: p(10, -48),
+    rElbow: p(12, -30),
+    rHand: p(6, -46),
+    lKnee: p(-2, 32),
+    lFoot: p(-8, 64),
+    rKnee: p(6, 32),
+    rFoot: p(8, 64),
+  },
+  STAND,
+);
+
+/** 从两侧按住坐着的人（手向前平伸稍下压） */
+export const PRESS_DOWN = mk(
+  {
+    head: p(12, -84),
+    neck: p(8, -60),
+    lElbow: p(28, -50),
+    lHand: p(52, -40),
+    rElbow: p(30, -46),
+    rHand: p(56, -36),
+    rKnee: p(14, 30),
+    rFoot: p(28, 62),
+  },
+  STAND,
+);
+
+/** 砌墙：双手托砖举高 */
+export const BUILD_WALL = mk(
+  {
+    head: p(8, -86),
+    neck: p(4, -62),
+    lElbow: p(18, -88),
+    lHand: p(40, -110),
+    rElbow: p(24, -84),
+    rHand: p(46, -106),
+  },
+  STAND,
+);
+
+/** 墙根下睡觉：侧躺蜷腿，头枕手臂 (ground pose) */
+export const SLEEP_UNDER_WALL: Pose = {
+  head: p(-80, -18),
+  neck: p(-58, -8),
+  hip: p(0, 0),
+  lElbow: p(-80, -2),
+  lHand: p(-96, -14),
+  rElbow: p(-36, 4),
+  rHand: p(-14, 2),
+  lKnee: p(26, -22),
+  lFoot: p(8, 0),
+  rKnee: p(30, -16),
+  rFoot: p(14, 4),
+};
+
+/** 拔键帽：身体后仰发力，双手向前下方攥紧 */
+export const PULL_KEYCAP = mk(
+  {
+    head: p(-18, -80),
+    neck: p(-12, -58),
+    lElbow: p(14, -40),
+    lHand: p(40, -26),
+    rElbow: p(16, -36),
+    rHand: p(42, -22),
+    lKnee: p(-22, 30),
+    lFoot: p(-38, 64),
+    rKnee: p(20, 30),
+    rFoot: p(32, 64),
+  },
+  STAND,
+);
+
+/** 流水线·前：弯腰铺砖 */
+export const ASSEMBLY_LAY = mk(
+  {
+    head: p(42, -52),
+    neck: p(28, -38),
+    lElbow: p(44, -14),
+    lHand: p(58, 8),
+    rElbow: p(48, -12),
+    rHand: p(62, 10),
+    lKnee: p(12, 30),
+    lFoot: p(-6, 64),
+    rKnee: p(28, 28),
+    rFoot: p(26, 64),
+  },
+  STAND,
+);
+/** 流水线·前：起身抱砖 */
+export const ASSEMBLY_CARRY = mk(
+  {
+    head: p(8, -86),
+    lElbow: p(14, -40),
+    lHand: p(32, -48),
+    rElbow: p(18, -38),
+    rHand: p(36, -46),
+  },
+  STAND,
+);
+/** 流水线·后：拿刷子粉刷 (brush stroke low / high) */
+export const ASSEMBLY_BRUSH_LO = mk(
+  {
+    head: p(22, -78),
+    neck: p(14, -56),
+    rElbow: p(36, -30),
+    rHand: p(62, -8),
+    lElbow: p(-6, -34),
+    lHand: p(4, -14),
+  },
+  STAND,
+);
+export const ASSEMBLY_BRUSH_HI = mk(
+  {
+    head: p(20, -80),
+    neck: p(12, -58),
+    rElbow: p(38, -44),
+    rHand: p(64, -40),
+    lElbow: p(-6, -34),
+    lHand: p(4, -14),
+  },
+  STAND,
+);
+
+/** 挠头 */
+export const SCRATCH_HEAD = mk(
+  { rElbow: p(30, -78), rHand: p(12, -108), lElbow: p(-12, -34), lHand: p(-14, -6) },
+  STAND,
+);
+
+/** 小桌前坐着打字（思维剧场里的黑小人） */
+export const SIT_DESK = mk(
+  {
+    lElbow: p(22, -36),
+    lHand: p(46, -42),
+    rElbow: p(26, -34),
+    rHand: p(50, -40),
+  },
+  SIT,
+);
