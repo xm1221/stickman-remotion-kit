@@ -14,8 +14,8 @@ import {
   STAND,
   SWING_DOWN,
   SWING_UP,
-  WALK_A,
-  WALK_B,
+  idleSway,
+  walkCycle,
   YELL,
 } from "../components/poses";
 import { Pop, SpeechBubble } from "../components/SpeechBubble";
@@ -24,7 +24,7 @@ import { C, hop, ip, lin, track } from "../utils";
 import { LIE_Y, MS, STAND_Y, talk } from "./common";
 
 /** teacher's pointer stick drawn from the hand along the forearm direction */
-export const pointerStick = (p: ReturnType<typeof poseTrack>, color = C.red) => {
+export const pointerStick = (p: ReturnType<typeof poseTrack>, color = "#111") => {
   const dx = p.rHand.x - p.rElbow.x;
   const dy = p.rHand.y - p.rElbow.y;
   const n = Math.hypot(dx, dy) || 1;
@@ -91,9 +91,6 @@ export const Act1: React.FC = () => {
     [625, ARMS_CROSS],
     [800, ARMS_CROSS],
     [812, HANDS_HIP],
-    [822, WALK_A],
-    [834, WALK_B],
-    [846, WALK_A],
     [858, KICK],
     [890, KICK],
     [905, HANDS_HIP],
@@ -102,6 +99,8 @@ export const Act1: React.FC = () => {
     [990, FLAIL],
     [1005, HANDS_HIP],
   ]);
+  if (f >= 812 && f < 858) redPose = walkCycle(f, 10);
+  else if ((f >= 395 && f < 812) || (f >= 905 && f < 962) || (f >= 1005 && f < 1050)) redPose = idleSway(redPose, f, 2.5);
   if (f >= 490 && f < 600) redPose = offsetPose(redPose, { rHand: { x: 0, y: Math.sin(f * 0.5) * 8 } });
   const redRot = track(f, [
     [962, 0],
@@ -146,6 +145,24 @@ export const Act1: React.FC = () => {
     [1000, SWING_DOWN],
     [1030, HANDS_HIP],
   ]);
+  // 畏缩：站立时略蜷肩缩颈，不像轻松敢干
+  let bluePoseFinal = bluePose;
+  if (f >= 395 && f < 640) {
+    bluePoseFinal = idleSway(offsetPose(bluePose, {
+      head: { x: -4, y: 6 },
+      neck: { x: -2, y: 4 },
+      lElbow: { x: 6, y: 4 },
+      rElbow: { x: -4, y: 4 },
+      lHand: { x: 8, y: 2 },
+      rHand: { x: -2, y: 2 },
+    }), f, 2);
+  } else if (f >= 640 && f < 905) {
+    bluePoseFinal = bluePose; // lie / phone already passive
+  } else if (f >= 930) {
+    bluePoseFinal = idleSway(bluePose, f, 2);
+  } else {
+    bluePoseFinal = bluePose;
+  }
   const blueFacing = f < 900 ? 1 : -1;
   const hasPhone = f >= 620 && f < 862;
   const hasPillow = f >= 935;
@@ -163,14 +180,14 @@ export const Act1: React.FC = () => {
           <SmokePuff key={i} x={930 + i * 30} y={400} t={f - 360 - i * 2} seed={`e${i}`} dark={false} />
         ))}
         <StickFigure
-          pose={bluePose}
+          pose={bluePoseFinal}
           x={blueX}
           y={f < 395 ? startY(STAND_Y) : blueY}
           scale={blueScale}
           facing={blueFacing}
           color={C.blue}
-          eyes={f >= 862 && f < 905 ? "wide" : f >= 905 ? "angry" : f >= 680 ? "closed" : "normal"}
-          mouth={f >= 640 && f < 862 ? "smile" : f >= 905 ? "grit" : talk(f, 640, 800)}
+          eyes={f >= 862 && f < 905 ? "wide" : f >= 905 ? "angry" : f >= 680 ? "closed" : f >= 620 ? "sad" : "sad"}
+          mouth={f >= 640 && f < 862 ? "flat" : f >= 905 ? "grit" : talk(f, 640, 800) === "open" ? "open" : "frown"}
           extras={(p) => (
             <>
               {hasPhone && <Phone x={p.rHand.x + 4} y={p.rHand.y - 6} frame={f} />}

@@ -12,7 +12,7 @@ import { FONT, ip } from "./utils";
 
 export const PointerAndCursor: React.FC = () => {
   const F = useCurrentFrame();
-  const shrink = ip(F, [ACTS.credits.from, ACTS.credits.from + 60], [1, 0]);
+  const shrink = ip(F, [ACTS.credits.from, ACTS.credits.from + 40], [1, 0]);
   const shake = shakeAt(F);
   const head = heroHead(F);
   const grow = ip(F, [300, 345], [0, 1]);
@@ -50,7 +50,7 @@ export const PointerAndCursor: React.FC = () => {
           </Sequence>
         </AbsoluteFill>
       )}
-      <Sequence from={ACTS.credits.from} durationInFrames={ACTS.credits.dur} name="尾声 字幕">
+      <Sequence from={ACTS.credits.from} durationInFrames={ACTS.credits.dur} name="尾声 黑场">
         <Credits />
       </Sequence>
     </AbsoluteFill>

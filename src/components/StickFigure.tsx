@@ -24,6 +24,8 @@ export type StickFigureProps = {
   extras?: (p: Pose) => React.ReactNode;
   /** drawn behind the body, local space */
   behind?: (p: Pose) => React.ReactNode;
+  /** over-shoulder / back view: hide face features */
+  rear?: boolean;
 };
 
 const L = (a: Pt, b: Pt, c: string, w: number) => (
@@ -61,6 +63,7 @@ export const StickFigure: React.FC<StickFigureProps> = ({
   armsOnly = false,
   extras,
   behind,
+  rear = false,
 }) => {
   const w = strokeWidth;
   const h = pose.head;
@@ -150,20 +153,29 @@ export const StickFigure: React.FC<StickFigureProps> = ({
       {!armsOnly && (
         <g transform={`translate(${h.x} ${h.y}) rotate(${ang})`}>
           <circle cx={0} cy={0} r={HEAD_R} fill="#fff" stroke={color} strokeWidth={w} />
-          <g transform="translate(-4 0)">
-            {eye(2, -2)}
-            {eye(14, -2)}
-            {brow()}
-            {mouthEl()}
-            {glasses && (
-              <g transform={`rotate(${glassesTilt} 8 -2)`} stroke={color} strokeWidth={2} fill="none">
-                <circle cx={2} cy={-2} r={6} />
-                <circle cx={14} cy={-2} r={6} />
-                <line x1={8} y1={-2} x2={8} y2={-2} />
-                <line x1={-4} y1={-3} x2={-12} y2={-6} />
-              </g>
-            )}
-          </g>
+          {rear ? (
+            // back of head: simple ear hints + hair arc
+            <g stroke={color} strokeWidth={2.5} fill="none" strokeLinecap="round">
+              <path d="M-14,-6 q-4,6 0,12" />
+              <path d="M14,-6 q4,6 0,12" />
+              <path d="M-10,-16 q10,-8 20,0" />
+            </g>
+          ) : (
+            <g transform="translate(-4 0)">
+              {eye(2, -2)}
+              {eye(14, -2)}
+              {brow()}
+              {mouthEl()}
+              {glasses && (
+                <g transform={`rotate(${glassesTilt} 8 -2)`} stroke={color} strokeWidth={2} fill="none">
+                  <circle cx={2} cy={-2} r={6} />
+                  <circle cx={14} cy={-2} r={6} />
+                  <line x1={8} y1={-2} x2={8} y2={-2} />
+                  <line x1={-4} y1={-3} x2={-12} y2={-6} />
+                </g>
+              )}
+            </g>
+          )}
         </g>
       )}
       {extras?.(pose)}

@@ -152,6 +152,31 @@ export const WALK_B = mk(
   STAND,
 );
 
+/** Smooth stride between WALK_A and WALK_B (no snap). period = frames per full cycle. */
+export const walkCycle = (f: number, period = 12): Pose => {
+  const phase = ((f % period) + period) % period / period;
+  const k = (Math.sin(phase * Math.PI * 2) + 1) / 2;
+  return lerpPose(WALK_A, WALK_B, k);
+};
+
+/** Slight idle weight-shift on standing legs */
+export const idleSway = (base: Pose, f: number, amp = 3): Pose => {
+  const s = Math.sin(f / 18);
+  return offsetPose(base, {
+    lKnee: { x: -s * amp * 0.4, y: 0 },
+    lFoot: { x: -s * amp, y: Math.abs(s) * 0.5 },
+    rKnee: { x: s * amp * 0.4, y: 0 },
+    rFoot: { x: s * amp, y: Math.abs(s) * 0.5 },
+    hip: { x: s * amp * 0.3, y: 0 },
+  });
+};
+
+/** Legs-only from walkCycle (for CARRY/SHOVEL overlays) */
+export const walkLegs = (f: number, period = 12) => {
+  const w = walkCycle(f, period);
+  return { lKnee: w.lKnee, lFoot: w.lFoot, rKnee: w.rKnee, rFoot: w.rFoot };
+};
+
 export const KICK = mk(
   {
     head: p(-12, -82),

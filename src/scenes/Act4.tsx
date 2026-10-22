@@ -12,8 +12,8 @@ import {
   SHOVEL,
   SIT_GROUND,
   STAND,
-  WALK_A,
-  WALK_B,
+  walkCycle,
+  walkLegs,
   WRITE,
 } from "../components/poses";
 import { Pop, SpeechBubble } from "../components/SpeechBubble";
@@ -23,7 +23,7 @@ import { C, FONT, hop, ip, lin, track } from "../utils";
 import { BLUE_LAND_X, RED_LAND_X, ROCK_Y } from "./Act3";
 import { LIE_Y, MS, STAND_Y, talk } from "./common";
 
-const walkPose = (f: number) => (Math.floor(f / 9) % 2 === 0 ? WALK_A : WALK_B);
+const walkPose = (f: number) => walkCycle(f, 11);
 const BRICKS = 6;
 const PILE_X = 1430;
 const DROP_X = 1210;
@@ -104,7 +104,7 @@ export const Act4: React.FC = () => {
     if (f < 420) blueX = BLUE_LAND_X + (PILE_X - BLUE_LAND_X) * ip(f, [415, 420], [0, 1]);
   } else if (f >= lastTripEnd) {
     blueX = track(f, [[lastTripEnd, PILE_X], [lastTripEnd + 40, 1180]], lin);
-    bluePose = f < lastTripEnd + 40 ? walkPose(f) : f >= 695 ? CHEER : STAND;
+    bluePose = f < lastTripEnd + 40 ? walkPose(f) : f >= 695 ? STAND : STAND; // 仍偏克制，不狂欢
     blueFacing = -1;
   }
   if (cheer) blueY = STAND_Y + hop(f, 704, 720, 40) + hop(f, 728, 744, 40);
@@ -147,8 +147,8 @@ export const Act4: React.FC = () => {
           scale={MS}
           facing={blueFacing}
           color={C.blue}
-          eyes={f < 230 ? "dizzy" : cheer ? "closed" : "normal"}
-          mouth={f < 230 ? "open" : cheer ? "grin" : f >= 260 && f < 410 ? talk(f, 260, 410) : "smile"}
+          eyes={f < 230 ? "dizzy" : cheer ? "closed" : f >= 260 && f < 415 ? "sad" : "normal"}
+          mouth={f < 230 ? "open" : cheer ? "smile" : f >= 260 && f < 410 ? (talk(f, 260, 410) === "open" ? "open" : "frown") : "flat"}
           extras={(p) =>
             hasShovel && !(cheer && f >= 695) ? (
               <g>
@@ -209,7 +209,4 @@ export const Act4: React.FC = () => {
   );
 };
 
-const pickLegs = (f: number) => {
-  const w = Math.floor(f / 9) % 2 === 0 ? WALK_A : WALK_B;
-  return { lKnee: w.lKnee, lFoot: w.lFoot, rKnee: w.rKnee, rFoot: w.rFoot };
-};
+const pickLegs = (f: number) => walkLegs(f, 11);

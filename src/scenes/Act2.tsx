@@ -9,8 +9,8 @@ import {
   POINT,
   poseTrack,
   STAND,
-  WALK_A,
-  WALK_B,
+  idleSway,
+  walkCycle,
   YELL,
 } from "../components/poses";
 import { Pop, SpeechBubble } from "../components/SpeechBubble";
@@ -24,7 +24,7 @@ import { LIE_Y, MS, STAND_Y, talk } from "./common";
 const BLUE_X = 1160;
 export const CLOUD = { x: 960, y: 300 };
 
-const walkPose = (f: number) => (Math.floor(f / 10) % 2 === 0 ? WALK_A : WALK_B);
+const walkPose = (f: number) => walkCycle(f, 12);
 
 export const Act2: React.FC = () => {
   const f = useCurrentFrame();
@@ -38,7 +38,7 @@ export const Act2: React.FC = () => {
   if (f < 750) {
     redX = 780 + Math.sin(f / 40) * 70;
     redFacing = Math.cos(f / 40) >= 0 ? 1 : -1;
-    redPose = f >= 440 && f < 530 ? YELL : f % 160 < 110 ? walkPose(f) : POINT;
+    redPose = f >= 440 && f < 530 ? YELL : f % 160 < 110 ? walkPose(f) : idleSway(POINT, f, 2.5);
   } else if (f < 850) {
     redX = ip(f, [750, 840], [780 + Math.sin(750 / 40) * 70, 470], lin);
     redFacing = -1;
@@ -114,11 +114,11 @@ export const Act2: React.FC = () => {
             y={LIE_Y}
             scale={MS}
             scaleY={blueSquash}
-            rotate={f < 985 ? Math.sin(f / 14) * 5 : 0}
+            rotate={f < 985 ? Math.sin(f / 11) * 7 : 0}
             facing={-1}
             color={C.blue}
             eyes={f >= 985 ? "dizzy" : "sad"}
-            mouth={f >= 985 ? "open" : talk(f, 290, 430) === "open" || talk(f, 560, 720) === "open" ? "open" : "frown"}
+            mouth={f >= 985 ? "open" : "frown"}
             opacity={blueAlpha}
           />
         )}

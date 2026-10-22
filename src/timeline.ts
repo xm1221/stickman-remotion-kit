@@ -1,26 +1,27 @@
 import { ip, lin, track } from "./utils";
 
 export const FPS = 30;
-export const DURATION = 5400;
+export const DURATION = 5040; // ~2:48 — acts + short black hold
 
 export const ACTS = {
   act1: { from: 0, dur: 1050 },
   act2: { from: 1050, dur: 1650 },
   act3: { from: 2700, dur: 1500 },
   act4: { from: 4200, dur: 750 },
-  credits: { from: 4950, dur: 450 },
+  credits: { from: 4950, dur: 90 }, // black hold only
 };
 
-/** layout constants */
+/** layout constants — lower half is true first-person desk */
 export const L = {
   divider: 548,
   ground: 430, // mind-theater ground line
-  heroX: 640,
-  heroY: 930,
-  heroScale: 1.7,
-  deskY: 905,
-  screen: { x: 790, y: 572, w: 680, h: 316 },
-  clock: { x: 1560, y: 590 },
+  // FP: arms origin bottom-center; large screen facing viewer
+  heroX: 960,
+  heroY: 1205,
+  heroScale: 2.5,
+  deskY: 1010,
+  screen: { x: 240, y: 560, w: 1440, h: 390 },
+  clock: { x: 1705, y: 575 },
 };
 
 const H = (h: number, m: number, s = 0) => h * 3600 + m * 60 + s;

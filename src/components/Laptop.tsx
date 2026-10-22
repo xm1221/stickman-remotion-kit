@@ -102,14 +102,14 @@ export const Laptop: React.FC<LaptopProps> = ({
       </div>
       {/* page */}
       <div style={{ padding: "10px 36px", position: "relative", height: h - 34 - 34 - 14 }}>
-        <div style={{ textAlign: "center", fontSize: 30, fontWeight: 900, marginBottom: 8 }}>《马原实践作业》</div>
+        <div style={{ textAlign: "center", fontSize: 34, fontWeight: 900, marginBottom: 8 }}>《马原实践作业》</div>
         {lines.length === 0 ? (
           <div style={{ fontSize: 26, height: 36 }}>
             <span style={{ opacity: cursorOn ? 1 : 0, fontWeight: 300 }}>|</span>
           </div>
         ) : (
           lines.map((l, i) => (
-            <div key={i} style={{ fontSize: 25, lineHeight: "36px", whiteSpace: "pre", position: "relative" }}>
+            <div key={i} style={{ fontSize: 28, lineHeight: "40px", whiteSpace: "pre", position: "relative" }}>
               {l}
               {i === lines.length - 1 && <span style={{ opacity: cursorOn ? 1 : 0, fontWeight: 300 }}>|</span>}
               {i < markedLines && (
